@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script type="text/javascript">
+        function alerttest(){
+             console.log("这是打印了log");
+        }
+    </script>
+
+    <script type="text/javascript">
+        function sayhello() {
+            //action 为Android端的key，toastMsg为Android那边的方法名
+            action.toastMsg("hi,我是被Android端调用的");
+            action.toastMsg2("真实让人头疼");
+        }
+    </script>
+    <script type="text/javascript">
+        function sum(i,j) {
+            document.getElementById("h").innerHTML = "拿到的结果: "+(i+j);
+            return "拿到的结果: "+(i+j);
+        }
+    </script>
+
+</head>
+<body>
+<h1 id="h">这是一个简单的 HTML 文件</h1>
+<button class="button" onclick="sayhello()">JavaScript测试</button>
+<button class="button" onclick="alerttest()">alert</button>
+
+</body>
+</html>
