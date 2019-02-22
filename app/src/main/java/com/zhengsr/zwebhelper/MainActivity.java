@@ -1,18 +1,23 @@
 package com.zhengsr.zwebhelper;
 
 import android.annotation.SuppressLint;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.JavascriptInterface;
+import android.webkit.ValueCallback;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.zhengsr.zweblib.ZWebHelper;
+import com.zhengsr.zweblib.widght.ZWebChromeClient;
+import com.zhengsr.zweblib.widght.ZWebViewClient;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -24,13 +29,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         final String url = "https://blog.csdn.net/u011418943";
+        //final String url = "https://mp.weixin.qq.com/s/nn-nwXnRI9JYSmknH1pzYg";
         FrameLayout frameLayout = findViewById(R.id.content);
+        View view = LayoutInflater.from(this).inflate(R.layout.errorview,null);
         ZWebHelper.with(this)
-                //.url("test.html")
                 .url(url)
+                .errorView(view)
                 .parentView(frameLayout)
-                .topIndicator(4, Color.parseColor("#3F51B5"))
                 .go();
+
+
+
+
 
         WebView webView = ZWebHelper.getWebView();
 
@@ -65,9 +75,20 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-
-
     }
+    ZWebViewClient zWebViewClient = new ZWebViewClient(){
+        @Override
+        public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+            return super.shouldInterceptRequest(view, request);
+        }
+    };
+
+    ZWebChromeClient zWebChromeClient = new ZWebChromeClient(){
+        @Override
+        public void onProgressChanged(WebView view, int newProgress) {
+            super.onProgressChanged(view, newProgress);
+        }
+    };
 
     class javaScripeTest {
         @JavascriptInterface
@@ -83,7 +104,13 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void test(View view) {
-        ZWebHelper.test("sum(2,3)");
+        ZWebHelper.sendActionJs("sum(2,3)");
+        ZWebHelper.evaluateJavascript("sum(3,4)", new ValueCallback<String>() {
+            @Override
+            public void onReceiveValue(String value) {
+
+            }
+        });
     }
 
     @Override

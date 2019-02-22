@@ -40,7 +40,7 @@ public class ZWebHelper {
         return WebRequestManager.getInstance().getWebSettings();
     }
 
-    public static void test(String action){
+    public static void sendActionJs(String action){
         WebRequestManager.getInstance().sendActionJs(action);
     }
 

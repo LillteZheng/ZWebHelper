@@ -9,4 +9,5 @@ public interface ZwebLoadListener {
     void onPageStart();
     void onPageProgress(int progress);
     void onPageFinish();
+    void onReceivedError(String errorUrl, String errorMsg);
 }

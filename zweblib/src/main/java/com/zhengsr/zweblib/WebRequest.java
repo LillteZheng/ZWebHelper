@@ -2,6 +2,7 @@ package com.zhengsr.zweblib;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.URLUtil;
 
@@ -36,6 +37,8 @@ public class WebRequest {
         ZWebViewClient webViewClient;
         ZWebChromeClient webChromeClient;
         int barHeight = -1,barColor = -1;
+        View errorView;
+        String errorUrl;
 
         public WebBuilder url(String url){
             this.url = url;
@@ -61,14 +64,28 @@ public class WebRequest {
             return this;
         }
 
+        public WebBuilder errorView(View errorView){
+            this.errorView = errorView;
+            return this;
+        }
+        public WebBuilder errorUrl(String errorUrl){
+            this.errorUrl = errorUrl;
+            return this;
+        }
+
         public WebBuilder go(){
             checkNull(this);
             if (!URLUtil.isNetworkUrl(url) && !URLUtil.isAssetUrl(url)){
                 url = "file:///android_asset/"+url;
             }
+            if (!URLUtil.isNetworkUrl(errorUrl) && !URLUtil.isAssetUrl(errorUrl)){
+                errorUrl = "file:///android_asset/"+errorUrl;
+            }
             WebRequestManager.getInstance().checkData(this);
             return this;
         }
+
+
 
         public Context getContext() {
             return context;
@@ -96,6 +113,14 @@ public class WebRequest {
 
         public int getBarColor() {
             return barColor;
+        }
+
+        public View getErrorView() {
+            return errorView;
+        }
+
+        public String getErrorUrl() {
+            return errorUrl;
         }
     }
 

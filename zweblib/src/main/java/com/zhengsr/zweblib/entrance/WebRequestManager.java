@@ -2,6 +2,7 @@ package com.zhengsr.zweblib.entrance;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.ValueCallback;
@@ -29,6 +30,8 @@ public class WebRequestManager implements ZwebLoadListener {
     private ProgressView mBar;
     private  Context mContext;
     private WebSettings mWebSettings;
+    private boolean isOnResume,isOnPause,isOndestory;
+    private boolean isErrorLoad;
     private static class Holder {
        static final WebRequestManager INSTANCE = new WebRequestManager();
     }
@@ -51,6 +54,10 @@ public class WebRequestManager implements ZwebLoadListener {
 
 
     private void configData(WebRequest.WebBuilder builder){
+
+        isOndestory = false;
+        isOnPause = false;
+        isOnResume = false;
         if (mWebView == null) {
             mWebView = new ZwebView(builder.getContext());
             //开启硬件加速
@@ -99,9 +106,8 @@ public class WebRequestManager implements ZwebLoadListener {
         mWebSettings.setGeolocationDatabasePath("");
 
         //缓存和图片加载，请自行配置
-
-
     }
+
 
     private void webClient(){
         ZWebViewClient client = mBuilder.getWebViewClient();
@@ -141,20 +147,26 @@ public class WebRequestManager implements ZwebLoadListener {
             @Override
             public void onResume() {
                 super.onResume();
-                onResume();
+                if (!isOnResume) {
+                    WebRequestManager.this.onResume();
+                }
             }
 
 
             @Override
             public void onPause() {
                 super.onPause();
-                onPause();
+                if (!isOnPause) {
+                    WebRequestManager.this.onPause();
+                }
             }
 
             @Override
             public void onDestroy() {
                 super.onDestroy();
-                onDestroy();
+                if (!isOndestory) {
+                    WebRequestManager.this.onDestroy();
+                }
             }
 
             @Override
@@ -165,12 +177,15 @@ public class WebRequestManager implements ZwebLoadListener {
     }
 
     public void onResume(){
+        isOnResume = true;
         getWebView().onResume();
     }
     public void onPause(){
+        isOnPause = true;
         getWebView().onPause();
     }
     public void onDestroy(){
+        isOndestory = true;
         if (mWebView != null) {
             mWebView.removeAllViews();
             mWebView.destroy();
@@ -180,7 +195,9 @@ public class WebRequestManager implements ZwebLoadListener {
 
     @Override
     public void onPageStart() {
-        mBar.setVisibility(View.VISIBLE);
+        if (mBar != null) {
+            mBar.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
@@ -192,9 +209,26 @@ public class WebRequestManager implements ZwebLoadListener {
 
     @Override
     public void onPageFinish() {
-        mBar.setVisibility(View.GONE);
+        if (mBar != null) {
+            mBar.setVisibility(View.GONE);
+        }
+
     }
 
+    @Override
+    public void onReceivedError(String errorUrl, String errorMsg) {
+        isErrorLoad = true;
+        if (mBuilder != null) {
+            if (!TextUtils.isEmpty(mBuilder.getErrorUrl())) {
+                mWebView.loadUrl(mBuilder.getErrorUrl());
+            }
+            if (mBuilder.getErrorView() != null) {
+                mWebView.removeAllViews();
+                mBuilder.getParentView().removeAllViews();
+                mBuilder.getParentView().addView(mBuilder.getErrorView());
+            }
+        }
+    }
 
     public boolean canGoBack(int keyCode){
         if (keyCode == KeyEvent.KEYCODE_BACK) {
