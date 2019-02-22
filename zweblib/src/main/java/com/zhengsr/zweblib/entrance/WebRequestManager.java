@@ -2,7 +2,6 @@ package com.zhengsr.zweblib.entrance;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.ValueCallback;
@@ -142,16 +141,20 @@ public class WebRequestManager implements ZwebLoadListener {
             @Override
             public void onResume() {
                 super.onResume();
+                onResume();
             }
+
 
             @Override
             public void onPause() {
                 super.onPause();
+                onPause();
             }
 
             @Override
             public void onDestroy() {
                 super.onDestroy();
+                onDestroy();
             }
 
             @Override
@@ -161,15 +164,27 @@ public class WebRequestManager implements ZwebLoadListener {
         });
     }
 
+    public void onResume(){
+        getWebView().onResume();
+    }
+    public void onPause(){
+        getWebView().onPause();
+    }
+    public void onDestroy(){
+        if (mWebView != null) {
+            mWebView.removeAllViews();
+            mWebView.destroy();
+            mWebView = null;
+        }
+    }
+
     @Override
     public void onPageStart() {
-        Log.d(TAG, "zsr --> onPageStart: ");
         mBar.setVisibility(View.VISIBLE);
     }
 
     @Override
     public void onPageProgress(int progress) {
-        Log.d(TAG, "zsr --> onPageProgress: "+progress);
         if (mBar != null) {
             mBar.setProgress(progress);
         }

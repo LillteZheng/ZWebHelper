@@ -18,14 +18,14 @@ public class ZWebHelper {
     }
 
     public static void onPause(){
-
+        WebRequestManager.getInstance().onPause();
     }
 
     public static void onDestroy(){
-
+        WebRequestManager.getInstance().onDestroy();
     }
     public static void onResume(){
-
+        WebRequestManager.getInstance().onResume();
     }
 
     public static boolean canGoBack(int keyCode){
