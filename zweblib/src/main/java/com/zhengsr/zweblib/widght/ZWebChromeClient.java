@@ -28,7 +28,8 @@ public class ZWebChromeClient extends WebChromeClient {
     public void onReceivedTitle(WebView view, String title) {
         super.onReceivedTitle(view, title);
         if (!TextUtils.isEmpty(title) && title.toLowerCase().contains("error")
-                || "404".equals(title)
+                || title.contains("404")
+                || title.contains("500")
                 || "System Error".equals(title)){
             if (mListener != null){
                 mListener.onReceivedError(view.getUrl(),title);

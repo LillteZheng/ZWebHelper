@@ -26,7 +26,8 @@ public class WebRequest {
 
     public WebBuilder getBuilder(Context context){
         mBuilder = new WebBuilder();
-        mBuilder.context = context;
+        //避免内存泄漏
+        mBuilder.context = context.getApplicationContext();
         return mBuilder;
     }
 

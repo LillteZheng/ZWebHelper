@@ -15,7 +15,7 @@ import android.view.View;
 public class ProgressView extends View {
     private static final String TAG = "ProgressView";
     private Paint mPaint;
-    private int mWidth,mHeight = 3;
+    private int mWidth,mHeight = 4;
     private int mCurentWidth;
 
     public ProgressView(Context context) {

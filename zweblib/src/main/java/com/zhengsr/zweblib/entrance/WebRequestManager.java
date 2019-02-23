@@ -2,9 +2,12 @@ package com.zhengsr.zweblib.entrance;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.os.Build;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.ValueCallback;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -17,6 +20,8 @@ import com.zhengsr.zweblib.view.ProgressView;
 import com.zhengsr.zweblib.view.ZwebView;
 import com.zhengsr.zweblib.widght.ZWebChromeClient;
 import com.zhengsr.zweblib.widght.ZWebViewClient;
+
+import java.lang.ref.WeakReference;
 
 /**
  * Created by zhengshaorui
@@ -32,6 +37,7 @@ public class WebRequestManager implements ZwebLoadListener {
     private WebSettings mWebSettings;
     private boolean isOnResume,isOnPause,isOndestory;
     private boolean isErrorLoad;
+    private ViewGroup mParentView;
     private static class Holder {
        static final WebRequestManager INSTANCE = new WebRequestManager();
     }
@@ -45,8 +51,8 @@ public class WebRequestManager implements ZwebLoadListener {
 
     public void checkData(WebRequest.WebBuilder builder){
         mBuilder = builder;
-        mContext = mBuilder.getContext();
-        getLifeCycle(mBuilder.getContext());
+        mContext = mBuilder.getContext().getApplicationContext();
+        getLifeCycle(mContext);
 
         configData(mBuilder);
 
@@ -58,19 +64,27 @@ public class WebRequestManager implements ZwebLoadListener {
         isOndestory = false;
         isOnPause = false;
         isOnResume = false;
+        if (mParentView != null){
+            mParentView = null;
+        }
+        WeakReference<ViewGroup> weakReference = new WeakReference<ViewGroup>(builder.getParentView());
+        mParentView = weakReference.get();
+
         if (mWebView == null) {
-            mWebView = new ZwebView(builder.getContext());
+            mWebView = new ZwebView(builder.getContext().getApplicationContext());
             //开启硬件加速
             mWebView.setLayerType(View.LAYER_TYPE_HARDWARE,null);
             WebView.setWebContentsDebuggingEnabled(true);
             configWebSettings();
+        }else{
+            mWebView.removeAllViews();
         }
         mBar = new ProgressView(mContext).setSize(mContext.getResources().getDisplayMetrics().widthPixels,
                 builder.getBarHeight() );
         mBar.setColor(builder.getBarColor());
         mBar.setProgress(10);
         mWebView.addView(mBar);
-        builder.getParentView().addView(mWebView);
+        mParentView.addView(mWebView);
 
         webClient();
         mWebView.loadUrl(builder.getUrl());
@@ -104,6 +118,16 @@ public class WebRequestManager implements ZwebLoadListener {
         //GPRS ,LBS
         mWebSettings.setGeolocationEnabled(true);
         mWebSettings.setGeolocationDatabasePath("");
+        //防止图片加载不出 http 开头的图片
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            //两者都可以
+            mWebSettings.setMixedContentMode(mWebSettings.getMixedContentMode());
+            //mWebView.getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        }
+
+        //为了加快速度，可以刚开始不加载图片，等结束后再去加载图片
+        mWebSettings.setLoadsImagesAutomatically(false);
+
 
         //缓存和图片加载，请自行配置
     }
@@ -146,27 +170,27 @@ public class WebRequestManager implements ZwebLoadListener {
         ZLifeCycle.with(context, new LifeListenerAdapter() {
             @Override
             public void onResume() {
-                super.onResume();
                 if (!isOnResume) {
                     WebRequestManager.this.onResume();
                 }
+                super.onResume();
             }
 
 
             @Override
             public void onPause() {
-                super.onPause();
                 if (!isOnPause) {
                     WebRequestManager.this.onPause();
                 }
+                super.onPause();
             }
 
             @Override
             public void onDestroy() {
-                super.onDestroy();
                 if (!isOndestory) {
                     WebRequestManager.this.onDestroy();
                 }
+                super.onDestroy();
             }
 
             @Override
@@ -179,17 +203,27 @@ public class WebRequestManager implements ZwebLoadListener {
     public void onResume(){
         isOnResume = true;
         getWebView().onResume();
+        //for js
+        getWebView().resumeTimers();
     }
     public void onPause(){
         isOnPause = true;
         getWebView().onPause();
+        //for js
+        getWebView().pauseTimers();
     }
     public void onDestroy(){
         isOndestory = true;
         if (mWebView != null) {
+            mWebView.setWebViewClient(null);
+            mWebView.setWebChromeClient(null);
+            mWebView.clearHistory();
             mWebView.removeAllViews();
+            mWebView.loadDataWithBaseURL(null, "", "text/html", "utf-8", null);
+            mParentView.removeView(mWebView);
             mWebView.destroy();
             mWebView = null;
+
         }
     }
 
@@ -212,20 +246,24 @@ public class WebRequestManager implements ZwebLoadListener {
         if (mBar != null) {
             mBar.setVisibility(View.GONE);
         }
+        if (!getWebSettings().getLoadsImagesAutomatically()){
+            getWebSettings().setLoadsImagesAutomatically(true);
+        }
 
     }
 
     @Override
     public void onReceivedError(String errorUrl, String errorMsg) {
         isErrorLoad = true;
+        Log.d(TAG, "zsr --> onReceivedError: "+errorMsg);
         if (mBuilder != null) {
             if (!TextUtils.isEmpty(mBuilder.getErrorUrl())) {
                 mWebView.loadUrl(mBuilder.getErrorUrl());
             }
             if (mBuilder.getErrorView() != null) {
-                mWebView.removeAllViews();
-                mBuilder.getParentView().removeAllViews();
-                mBuilder.getParentView().addView(mBuilder.getErrorView());
+                mParentView.removeAllViews();
+                getWebView().loadDataWithBaseURL(null,"","text/html","utf-8",null);
+                mParentView.addView(mBuilder.getErrorView());
             }
         }
     }
