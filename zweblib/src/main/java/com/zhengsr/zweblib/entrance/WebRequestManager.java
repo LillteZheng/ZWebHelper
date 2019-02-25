@@ -63,11 +63,10 @@ public class WebRequestManager implements ZwebLoadListener {
 
     public void checkData(WebRequest.WebBuilder builder){
         mBuilder = builder;
-        //假如弱引用
-        mWeakMap.put(RourtKey.CONTEXT.name(),new WeakReference<Object>(builder.getContext()));
-        mWeakMap.put(RourtKey.PARENTVIEW.name(),new WeakReference<Object>(builder.getParentView()));
+        mWeakMap.put(RouteKey.PARENTVIEW.name(),new WeakReference<Object>(builder.getParentView()));
+        mWeakMap.put(RouteKey.CONTEXT.name(),new WeakReference<Object>(builder.getContext()));
         if (builder.getErrorView() != null) {
-            mWeakMap.put(RourtKey.ERRORView.name(), new WeakReference<Object>(builder.getErrorView()));
+            mWeakMap.put(RouteKey.ERRORView.name(), new WeakReference<Object>(builder.getErrorView()));
         }
 
         if (mParentView != null){
@@ -78,8 +77,8 @@ public class WebRequestManager implements ZwebLoadListener {
             mWebView = null;
         }
 
-        mContext = (Context) mWeakMap.get(RourtKey.CONTEXT.name()).get();
-        mParentView = (ViewGroup) mWeakMap.get(RourtKey.PARENTVIEW.name()).get();
+        mContext = (Context) mWeakMap.get(RouteKey.CONTEXT.name()).get();
+        mParentView = (ViewGroup) mWeakMap.get(RouteKey.PARENTVIEW.name()).get();
 
         getLifeCycle(mContext);
 
@@ -95,12 +94,14 @@ public class WebRequestManager implements ZwebLoadListener {
         isOnResume = false;
 
         if (mWebView == null) {
-            mWebView = new ZwebView(builder.getContext().getApplicationContext());
-            //开启硬件加速
-            mWebView.setLayerType(View.LAYER_TYPE_HARDWARE,null);
-            WebView.setWebContentsDebuggingEnabled(true);
-            configWebSettings();
+            mWeakMap.put(RouteKey.WEBVIEW.name(),new WeakReference<Object>(
+                    new ZwebView(builder.getContext())));
         }
+        mWebView = (ZwebView) mWeakMap.get(RouteKey.WEBVIEW.name()).get();
+        //开启硬件加速
+        mWebView.setLayerType(View.LAYER_TYPE_HARDWARE,null);
+        WebView.setWebContentsDebuggingEnabled(true);
+        configWebSettings();
         mBar = new ProgressView(mContext).setSize(mContext.getResources().getDisplayMetrics().widthPixels,
                 builder.getBarHeight() );
         mBar.setColor(builder.getBarColor());
@@ -144,7 +145,6 @@ public class WebRequestManager implements ZwebLoadListener {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             //两者都可以
             mWebSettings.setMixedContentMode(mWebSettings.getMixedContentMode());
-            //mWebView.getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         }
 
         //为了加快速度，可以刚开始不加载图片，等结束后再去加载图片
@@ -241,15 +241,16 @@ public class WebRequestManager implements ZwebLoadListener {
             mWebView.clearHistory();
             mWebView.removeAllViews();
             mWebView.destroy();
-            mWebView.loadDataWithBaseURL(null, "", "text/html", "utf-8", null);
-            mParentView.removeAllViewsInLayout();
-            mParentView.removeView(mWebView);
-            Holder.INSTANCE = null;
-            mParentView = null;
             mWebView = null;
-            mContext = null;
-
         }
+        mParentView.removeAllViewsInLayout();
+        mParentView.removeView(mWebView);
+        mParentView = null;
+        mContext = null;
+        mWebView = null;
+        mBar = null;
+        mBuilder = null;
+        mWebSettings = null;
     }
 
     @Override

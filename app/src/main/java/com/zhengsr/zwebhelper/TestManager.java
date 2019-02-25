@@ -1,6 +1,10 @@
 package com.zhengsr.zwebhelper;
 
+import android.content.Context;
+import android.util.Log;
 import android.view.View;
+
+import java.lang.ref.WeakReference;
 
 /**
  * Created by zhengshaorui
@@ -8,6 +12,7 @@ import android.view.View;
  */
 
 public class TestManager {
+    private static final String TAG = "TestManager";
     private static class Holder {
         static final TestManager INSTANCE = new TestManager();
     }
@@ -19,11 +24,20 @@ public class TestManager {
     private TestManager() {
     }
     private View mTestView;
+    private Context mContext;
     public void setView(View view){
-        mTestView = view;
+        WeakReference<View> weakReference = new WeakReference<View>(view);
+        mTestView = weakReference.get();
     }
 
     public void onStop(){
         mTestView = null;
+        mContext = null;
+    }
+
+    public void register(Context context){
+        WeakReference<Context> weakReference = new WeakReference<Context>(context);
+        mContext = weakReference.get();
+        Log.d(TAG, "zsr --> register: "+mContext);
     }
 }

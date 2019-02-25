@@ -22,10 +22,10 @@ public class ZWebHelper {
     }
 
     public static void onDestroy(){
-        WebRequestManager.getInstance().onPause();
+        WebRequestManager.getInstance().onDestroy();
     }
     public static void onResume(){
-
+        WebRequestManager.getInstance().onResume();
     }
 
     public static boolean canGoBack(int keyCode){

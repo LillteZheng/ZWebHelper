@@ -5,7 +5,7 @@ package com.zhengsr.zweblib.entrance;
  * Time on 2019/2/25
  */
 
-public enum  RourtKey {
+public enum RouteKey {
     CONTEXT,
     WEBVIEW,
     PARENTVIEW,
