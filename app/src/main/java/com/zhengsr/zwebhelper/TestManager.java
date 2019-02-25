@@ -22,4 +22,8 @@ public class TestManager {
     public void setView(View view){
         mTestView = view;
     }
+
+    public void onStop(){
+        mTestView = null;
+    }
 }

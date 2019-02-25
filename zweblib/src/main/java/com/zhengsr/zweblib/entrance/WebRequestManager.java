@@ -22,6 +22,8 @@ import com.zhengsr.zweblib.widght.ZWebChromeClient;
 import com.zhengsr.zweblib.widght.ZWebViewClient;
 
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 /**
  * Created by zhengshaorui
@@ -38,8 +40,11 @@ public class WebRequestManager implements ZwebLoadListener {
     private boolean isOnResume,isOnPause,isOndestory;
     private boolean isErrorLoad;
     private ViewGroup mParentView;
+    private HashMap<String,WeakReference<Object>> mWeakMap = new LinkedHashMap<>(
+            new HashMap<String, WeakReference<Object>>());
+
     private static class Holder {
-       static final WebRequestManager INSTANCE = new WebRequestManager();
+       static  WebRequestManager INSTANCE = new WebRequestManager();
     }
 
     public static WebRequestManager getInstance() {
@@ -49,9 +54,33 @@ public class WebRequestManager implements ZwebLoadListener {
     private WebRequestManager() {
     }
 
+
+    public Context getContext(){
+        return mContext;
+    }
+
+    
+
     public void checkData(WebRequest.WebBuilder builder){
         mBuilder = builder;
-        mContext = mBuilder.getContext().getApplicationContext();
+        //假如弱引用
+        mWeakMap.put(RourtKey.CONTEXT.name(),new WeakReference<Object>(builder.getContext()));
+        mWeakMap.put(RourtKey.PARENTVIEW.name(),new WeakReference<Object>(builder.getParentView()));
+        if (builder.getErrorView() != null) {
+            mWeakMap.put(RourtKey.ERRORView.name(), new WeakReference<Object>(builder.getErrorView()));
+        }
+
+        if (mParentView != null){
+            mParentView = null;
+        }
+        if (mWebView != null){
+            mWebView.removeAllViews();
+            mWebView = null;
+        }
+
+        mContext = (Context) mWeakMap.get(RourtKey.CONTEXT.name()).get();
+        mParentView = (ViewGroup) mWeakMap.get(RourtKey.PARENTVIEW.name()).get();
+
         getLifeCycle(mContext);
 
         configData(mBuilder);
@@ -64,11 +93,6 @@ public class WebRequestManager implements ZwebLoadListener {
         isOndestory = false;
         isOnPause = false;
         isOnResume = false;
-        if (mParentView != null){
-            mParentView = null;
-        }
-        WeakReference<ViewGroup> weakReference = new WeakReference<ViewGroup>(builder.getParentView());
-        mParentView = weakReference.get();
 
         if (mWebView == null) {
             mWebView = new ZwebView(builder.getContext().getApplicationContext());
@@ -76,8 +100,6 @@ public class WebRequestManager implements ZwebLoadListener {
             mWebView.setLayerType(View.LAYER_TYPE_HARDWARE,null);
             WebView.setWebContentsDebuggingEnabled(true);
             configWebSettings();
-        }else{
-            mWebView.removeAllViews();
         }
         mBar = new ProgressView(mContext).setSize(mContext.getResources().getDisplayMetrics().widthPixels,
                 builder.getBarHeight() );
@@ -127,7 +149,6 @@ public class WebRequestManager implements ZwebLoadListener {
 
         //为了加快速度，可以刚开始不加载图片，等结束后再去加载图片
         mWebSettings.setLoadsImagesAutomatically(false);
-
 
         //缓存和图片加载，请自行配置
     }
@@ -219,10 +240,14 @@ public class WebRequestManager implements ZwebLoadListener {
             mWebView.setWebChromeClient(null);
             mWebView.clearHistory();
             mWebView.removeAllViews();
-            mWebView.loadDataWithBaseURL(null, "", "text/html", "utf-8", null);
-            mParentView.removeView(mWebView);
             mWebView.destroy();
+            mWebView.loadDataWithBaseURL(null, "", "text/html", "utf-8", null);
+            mParentView.removeAllViewsInLayout();
+            mParentView.removeView(mWebView);
+            Holder.INSTANCE = null;
+            mParentView = null;
             mWebView = null;
+            mContext = null;
 
         }
     }

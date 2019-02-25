@@ -1,7 +1,12 @@
 package com.zhengsr.zweblib.widght;
 
+import android.content.ActivityNotFoundException;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.net.http.SslError;
+import android.util.Log;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -16,6 +21,7 @@ import com.zhengsr.zweblib.entrance.WebRequestManager;
 
 public class ZWebViewClient extends WebViewClient {
     private static final String TAG = "ZwebViewClient";
+    public static final String SCHEME_SMS = "sms:";
     private ZwebLoadListener mListener;
     public void setListener(ZwebLoadListener listener){
         mListener = listener;
@@ -24,7 +30,11 @@ public class ZWebViewClient extends WebViewClient {
 
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, String url) {
-        WebRequestManager.getInstance().getWebView().loadUrl(url);
+        //处理邮件，电话等重用url
+        if (handleCommonLink(url)){
+            return true;
+        }
+        view.loadUrl(url);
         return true;
     }
 
@@ -40,6 +50,29 @@ public class ZWebViewClient extends WebViewClient {
         if (mListener != null){
             mListener.onPageFinish();
         }
+    }
+
+
+    private boolean handleCommonLink(String url) {
+        if (url.startsWith(WebView.SCHEME_TEL)
+                || url.startsWith(SCHEME_SMS)
+                || url.startsWith(WebView.SCHEME_MAILTO)
+                || url.startsWith(WebView.SCHEME_GEO)) {
+            try {
+                Context mActivity = null;
+                if ((mActivity = WebRequestManager.getInstance().getContext()) == null) {
+                    return false;
+                }
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(Uri.parse(url));
+                mActivity.startActivity(intent);
+            } catch (ActivityNotFoundException ignored) {
+                ignored.printStackTrace();
+
+            }
+            return true;
+        }
+        return false;
     }
 
 

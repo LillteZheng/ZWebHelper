@@ -1,17 +1,62 @@
 # ZWebHelper
 一个封装的Webview，暂时供自己用，功能完善再公布出来
 
-##基本使用
+## 基本使用
 ```
 ZWebHelper.with(this)
         .url(url)
         .parentView(frameLayout)
-        .topIndicator(4, Color.parseColor("#3F51B5"))
-        .webViewClient(zWebViewClient)
-        .webChromeClient(zWebChromeClient)
+        //.errorView(errorView)  //错误链接显示的view
+        //.errorUrl("error.html") //错误链接显示的 html
+        .topIndicator(4, Color.parseColor("#3F51B5")) //顶部进度条，设置高度和颜色
+        .webViewClient(zWebViewClient) // 设置WebViewClient，
+        .webChromeClient(zWebChromeClient) //设置WebChromeClient
         .go();
 ```
-client 的配置
+其中，自己配置了一些 WebSetting 的配置，如下：
+```
+mWebSettings.setDefaultTextEncodingName("utf-8");
+
+//支持 js
+mWebSettings.setJavaScriptEnabled(true);
+//支持 js 打开新窗口
+mWebSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+
+//屏幕自适应
+mWebSettings.setUseWideViewPort(true);
+mWebSettings.setLoadsImagesAutomatically(true);
+mWebSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
+
+//缩放操作
+mWebSettings.setSupportZoom(true); //支持缩放，默认为true。是下面那个的前提。
+mWebSettings.setBuiltInZoomControls(true); //设置内置的缩放控件。若为false，则该WebView不可缩放
+mWebSettings.setDisplayZoomControls(false); //隐藏原生的缩放控件
+
+//文件权限
+mWebSettings.setAllowFileAccess(true);
+mWebSettings.setAllowFileAccessFromFileURLs(true);
+mWebSettings.setAllowUniversalAccessFromFileURLs(true);
+mWebSettings.setAllowContentAccess(true);
+
+//GPRS ,LBS
+mWebSettings.setGeolocationEnabled(true);
+mWebSettings.setGeolocationDatabasePath("");
+//防止图片加载不出 http 开头的图片
+if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+    //两者都可以
+    mWebSettings.setMixedContentMode(mWebSettings.getMixedContentMode());
+    //mWebView.getSettings().setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+}
+
+//为了加快速度，可以刚开始不加载图片，等结束后再去加载图片
+mWebSettings.setLoadsImagesAutomatically(false);
+
+
+//缓存和是否加载图片，请自行配置
+```
+
+## client 的配置
+client 处理了一些常用的连接，以及一些错误回调
 ```
 ZWebViewClient zWebViewClient = new ZWebViewClient(){
     @Override

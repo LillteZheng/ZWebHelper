@@ -17,15 +17,16 @@ public class WebViewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_web_view);
 
         FrameLayout frameLayout = findViewById(R.id.content_web);
-         final String url = "https://blog.csdn.net/u011418943";
+       //  final String url = "https://blog.csdn.net/u011418943";
       //  final String url = "https://mp.weixin.qq.com/s/nn-nwXnRI9JYSmknH1pzYg";
+        String url = "test.html";
         View view = LayoutInflater.from(this).inflate(R.layout.errorview,null);
-       /* ZWebHelper.with(this)
+        ZWebHelper.with(this)
                 .url(url)
-              //  .errorView(view)
+                .errorView(view)
                 .parentView(frameLayout)
-                .go();*/
-       TestManager.getInstance().setView(view);
+                .go();
+       //TestManager.getInstance().setView(view);
 
     }
 
@@ -33,4 +34,12 @@ public class WebViewActivity extends AppCompatActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         return ZWebHelper.canGoBack(keyCode) || super.onKeyDown(keyCode, event);
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        TestManager.getInstance().onStop();
+    }
+
+
 }

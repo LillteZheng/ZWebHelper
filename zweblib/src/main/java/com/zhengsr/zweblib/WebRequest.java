@@ -27,7 +27,7 @@ public class WebRequest {
     public WebBuilder getBuilder(Context context){
         mBuilder = new WebBuilder();
         //避免内存泄漏
-        mBuilder.context = context.getApplicationContext();
+        mBuilder.context = context;
         return mBuilder;
     }
 
@@ -82,6 +82,7 @@ public class WebRequest {
             if (!URLUtil.isNetworkUrl(errorUrl) && !URLUtil.isAssetUrl(errorUrl)){
                 errorUrl = "file:///android_asset/"+errorUrl;
             }
+
             WebRequestManager.getInstance().checkData(this);
             return this;
         }
@@ -123,6 +124,8 @@ public class WebRequest {
         public String getErrorUrl() {
             return errorUrl;
         }
+
+
     }
 
     private static void checkNull(WebBuilder builder) {
