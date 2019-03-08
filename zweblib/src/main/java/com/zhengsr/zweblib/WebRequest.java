@@ -39,6 +39,7 @@ public class WebRequest {
         int barHeight = -1,barColor = -1;
         View errorView;
         String errorUrl;
+        private boolean isAutoLoadImage = true;
 
         public WebBuilder url(String url){
             this.url = url;
@@ -70,6 +71,10 @@ public class WebRequest {
         }
         public WebBuilder errorUrl(String errorUrl){
             this.errorUrl = errorUrl;
+            return this;
+        }
+        public WebBuilder autoLoadImage(boolean isAutoLoadImage){
+            this.isAutoLoadImage = isAutoLoadImage;
             return this;
         }
 
@@ -124,7 +129,9 @@ public class WebRequest {
             return errorUrl;
         }
 
-
+        public boolean isAutoLoadImage() {
+            return isAutoLoadImage;
+        }
     }
 
     private static void checkNull(WebBuilder builder) {

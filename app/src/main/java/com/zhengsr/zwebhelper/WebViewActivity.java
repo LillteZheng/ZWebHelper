@@ -25,6 +25,7 @@ public class WebViewActivity extends AppCompatActivity {
                 .url(url)
                 .errorView(view)
                 .parentView(frameLayout)
+                .autoLoadImage(true)
                 .go();
       // TestManager.getInstance().register(this);
        //TestManager.getInstance().setView(view);

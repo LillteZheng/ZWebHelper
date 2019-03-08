@@ -147,8 +147,12 @@ public class WebRequestManager implements ZwebLoadListener {
             mWebSettings.setMixedContentMode(mWebSettings.getMixedContentMode());
         }
 
-        //为了加快速度，可以刚开始不加载图片，等结束后再去加载图片
-        mWebSettings.setLoadsImagesAutomatically(false);
+        Log.d(TAG, "zsr --> configWebSettings: "+mBuilder.isAutoLoadImage());
+        if (!mBuilder.isAutoLoadImage()){
+            //为了加快速度，可以刚开始不加载图片，等结束后再去加载图片
+            mWebSettings.setLoadsImagesAutomatically(false);
+        }
+
 
         //缓存和图片加载，请自行配置
     }
