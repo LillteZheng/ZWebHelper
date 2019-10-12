@@ -15,6 +15,8 @@ import android.webkit.WebView;
 import com.ist.lifecyclerlib.ZLifeCycle;
 import com.ist.lifecyclerlib.listener.LifeListenerAdapter;
 import com.zhengsr.zweblib.WebRequest;
+import com.zhengsr.zweblib.bean.LoadBaseBean;
+import com.zhengsr.zweblib.bean.LoadDataBean;
 import com.zhengsr.zweblib.callback.ZwebLoadListener;
 import com.zhengsr.zweblib.view.ProgressView;
 import com.zhengsr.zweblib.view.ZwebView;
@@ -110,7 +112,15 @@ public class WebRequestManager implements ZwebLoadListener {
         mParentView.addView(mWebView);
 
         webClient();
-        mWebView.loadUrl(builder.getUrl());
+        if (!TextUtils.isEmpty(builder.getUrl())) {
+            mWebView.loadUrl(builder.getUrl());
+        }else if (builder.getLoadBean() != null){
+            LoadDataBean bean = builder.getLoadBean();
+            mWebView.loadData(bean.data,bean.mineType,bean.encoding);
+        }else if (builder.getLoadBaseBean() != null){
+            LoadBaseBean bean = builder.getLoadBaseBean();
+            mWebView.loadDataWithBaseURL(bean.baseUrl,bean.data,bean.mineType,bean.encoding,bean.historyUrl);
+        }
     }
     @SuppressLint("SetJavaScriptEnabled")
     private void configWebSettings(){
@@ -147,7 +157,6 @@ public class WebRequestManager implements ZwebLoadListener {
             mWebSettings.setMixedContentMode(mWebSettings.getMixedContentMode());
         }
 
-        Log.d(TAG, "zsr --> configWebSettings: "+mBuilder.isAutoLoadImage());
         if (!mBuilder.isAutoLoadImage()){
             //为了加快速度，可以刚开始不加载图片，等结束后再去加载图片
             mWebSettings.setLoadsImagesAutomatically(false);

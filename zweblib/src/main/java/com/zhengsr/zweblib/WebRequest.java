@@ -1,11 +1,12 @@
 package com.zhengsr.zweblib;
 
 import android.content.Context;
-import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.URLUtil;
 
+import com.zhengsr.zweblib.bean.LoadBaseBean;
+import com.zhengsr.zweblib.bean.LoadDataBean;
 import com.zhengsr.zweblib.entrance.WebRequestManager;
 import com.zhengsr.zweblib.widght.ZWebChromeClient;
 import com.zhengsr.zweblib.widght.ZWebViewClient;
@@ -39,10 +40,45 @@ public class WebRequest {
         int barHeight = -1,barColor = -1;
         View errorView;
         String errorUrl;
+        LoadDataBean loadBean;
+        LoadBaseBean loadBaseBean;
         private boolean isAutoLoadImage = true;
 
         public WebBuilder url(String url){
             this.url = url;
+            if (!URLUtil.isNetworkUrl(url) && !URLUtil.isAssetUrl(url)){
+                this.url = "file:///android_asset/"+url;
+            }
+
+            return this;
+        }
+        public WebBuilder loadData(String data,String mimeType,String encoding){
+            loadBean = new LoadDataBean();
+            loadBean.data = data;
+            loadBean.mineType = mimeType;
+            loadBean.encoding = encoding;
+            return this;
+        }
+        public WebBuilder loadData(String data){
+            loadBean = new LoadDataBean();
+            loadBean.data = data;
+            return this;
+        }
+        public WebBuilder loadDataWithBaseURL(String baseUrl,String data,
+                                              String mineType,String encoding,String historyUrl){
+            loadBaseBean = new LoadBaseBean();
+            loadBaseBean.baseUrl = baseUrl;
+            loadBaseBean.data = data;
+            loadBaseBean.mineType = mineType;
+            loadBaseBean.encoding = encoding;
+            loadBaseBean.historyUrl = historyUrl;
+            return this;
+        }
+
+        public WebBuilder loadDataWithBaseURL(String baseUrl,String data){
+            loadBaseBean = new LoadBaseBean();
+            loadBaseBean.baseUrl = baseUrl;
+            loadBaseBean.data = data;
             return this;
         }
 
@@ -71,6 +107,9 @@ public class WebRequest {
         }
         public WebBuilder errorUrl(String errorUrl){
             this.errorUrl = errorUrl;
+            if (!URLUtil.isNetworkUrl(errorUrl) && !URLUtil.isAssetUrl(errorUrl)){
+                this.errorUrl = "file:///android_asset/"+errorUrl;
+            }
             return this;
         }
         public WebBuilder autoLoadImage(boolean isAutoLoadImage){
@@ -80,12 +119,6 @@ public class WebRequest {
 
         public WebBuilder go(){
             checkNull(this);
-            if (!URLUtil.isNetworkUrl(url) && !URLUtil.isAssetUrl(url)){
-                url = "file:///android_asset/"+url;
-            }
-            if (!URLUtil.isNetworkUrl(errorUrl) && !URLUtil.isAssetUrl(errorUrl)){
-                errorUrl = "file:///android_asset/"+errorUrl;
-            }
 
             WebRequestManager.getInstance().checkData(this);
             return this;
@@ -132,12 +165,18 @@ public class WebRequest {
         public boolean isAutoLoadImage() {
             return isAutoLoadImage;
         }
+
+        public LoadDataBean getLoadBean() {
+            return loadBean;
+        }
+
+        public LoadBaseBean getLoadBaseBean() {
+            return loadBaseBean;
+        }
     }
 
     private static void checkNull(WebBuilder builder) {
-        if (TextUtils.isEmpty(builder.url)){
-            throw new NullPointerException("url cannot null null");
-        }
+
         if (builder.parentView == null){
             throw new NullPointerException("parentView cannot be null");
         }
