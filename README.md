@@ -1,17 +1,29 @@
 # ZWebHelper
-一个封装的Webview，暂时供自己用，功能完善再公布出来
+一个封装的Webview，功能基本完善
+
+关联：
+```
+	allprojects {
+		repositories {
+			...
+			maven { url 'https://jitpack.io' }
+		}
+	}
+```
+```
+implementation 'com.github.LillteZheng:ZWebHelper:v1.7'
+```
 
 ## 基本使用
 ```
-ZWebHelper.with(this)
-        .url(url)
-        .parentView(frameLayout)
-        //.errorView(errorView)  //错误链接显示的view
-        //.errorUrl("error.html") //错误链接显示的 html
-        .topIndicator(4, Color.parseColor("#3F51B5")) //顶部进度条，设置高度和颜色
-        .webViewClient(zWebViewClient) // 设置WebViewClient，
-        .webChromeClient(zWebChromeClient) //设置WebChromeClient
-        .go();
+ ZWebHelper.with(this)
+                //.url(url)
+                //.loadData(data)
+                .loadDataWithBaseURL(baseURL,data)
+                .errorView(view)
+                .parentView(frameLayout)
+                .autoLoadImage(true)
+                .go();
 ```
 其中，自己配置了一些 WebSetting 的配置，如下：
 ```
