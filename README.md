@@ -11,7 +11,7 @@
 	}
 ```
 ```
-implementation 'com.github.LillteZheng:ZWebHelper:v1.7'
+implementation 'com.github.LillteZheng:ZWebHelper:v1.8'
 ```
 
 ## 基本使用

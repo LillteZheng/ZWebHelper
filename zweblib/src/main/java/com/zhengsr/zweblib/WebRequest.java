@@ -27,7 +27,7 @@ public class WebRequest {
 
     public WebBuilder getBuilder(Context context){
         mBuilder = new WebBuilder();
-        mBuilder.context = context;
+        mBuilder.context = context.getApplicationContext();
         return mBuilder;
     }
 

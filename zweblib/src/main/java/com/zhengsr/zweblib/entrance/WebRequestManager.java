@@ -12,8 +12,6 @@ import android.webkit.ValueCallback;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
-import com.ist.lifecyclerlib.ZLifeCycle;
-import com.ist.lifecyclerlib.listener.LifeListenerAdapter;
 import com.zhengsr.zweblib.WebRequest;
 import com.zhengsr.zweblib.bean.LoadBaseBean;
 import com.zhengsr.zweblib.bean.LoadDataBean;
@@ -82,7 +80,6 @@ public class WebRequestManager implements ZwebLoadListener {
         mContext = (Context) mWeakMap.get(RouteKey.CONTEXT.name()).get();
         mParentView = (ViewGroup) mWeakMap.get(RouteKey.PARENTVIEW.name()).get();
 
-        getLifeCycle(mContext);
 
         configData(mBuilder);
 
@@ -135,7 +132,7 @@ public class WebRequestManager implements ZwebLoadListener {
         mWebSettings.setJavaScriptCanOpenWindowsAutomatically(true);
 
         //屏幕自适应
-        mWebSettings.setUseWideViewPort(true);
+       // mWebSettings.setUseWideViewPort(true);
         mWebSettings.setLoadWithOverviewMode(true);
         mWebSettings.setDomStorageEnabled(true);
         mWebSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
@@ -218,39 +215,6 @@ public class WebRequestManager implements ZwebLoadListener {
     }
 
 
-    private void getLifeCycle(Context context){
-        ZLifeCycle.with(context, new LifeListenerAdapter() {
-            @Override
-            public void onResume() {
-                if (!isOnResume) {
-                    WebRequestManager.this.onResume();
-                }
-                super.onResume();
-            }
-
-
-            @Override
-            public void onPause() {
-                if (!isOnPause) {
-                    WebRequestManager.this.onPause();
-                }
-                super.onPause();
-            }
-
-            @Override
-            public void onDestroy() {
-                if (!isOndestory) {
-                    WebRequestManager.this.onDestroy();
-                }
-                super.onDestroy();
-            }
-
-            @Override
-            public void onFail(String errorMsg) {
-                super.onFail(errorMsg);
-            }
-        });
-    }
 
     public void onResume(){
         isOnResume = true;
@@ -282,6 +246,7 @@ public class WebRequestManager implements ZwebLoadListener {
         mBar = null;
         mBuilder = null;
         mWebSettings = null;
+
     }
 
     @Override
@@ -313,7 +278,7 @@ public class WebRequestManager implements ZwebLoadListener {
     @Override
     public void onReceivedError(String errorUrl, String errorMsg) {
         isErrorLoad = true;
-        Log.d(TAG, "zsr --> onReceivedError: "+errorMsg);
+     //   Log.d(TAG, "zsr --> onReceivedError: "+errorMsg);
         if (mBuilder != null) {
             if (!TextUtils.isEmpty(mBuilder.getErrorUrl())) {
                 mWebView.loadUrl(mBuilder.getErrorUrl());

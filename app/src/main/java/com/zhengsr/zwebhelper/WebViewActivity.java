@@ -7,11 +7,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
+import com.just.agentweb.AgentWeb;
 import com.zhengsr.zweblib.ZWebHelper;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 
 public class WebViewActivity extends AppCompatActivity {
 
@@ -215,20 +215,35 @@ public class WebViewActivity extends AppCompatActivity {
         /*WebView webView  =new WebView(this);
         frameLayout.addView(webView);
         webView.loadDataWithBaseURL(null,dataUrl,"text/html","utf-8",null);*/
-        Document doc = Jsoup.parse(dataUrl);
 
         ZWebHelper.with(this)
-                //.url(url)
+                .url(url)
                 //.loadData(data)
-                .loadDataWithBaseURL(null,doc.toString())
+               // .loadDataWithBaseURL(null,dataUrl)
                 .errorView(view)
                 .parentView(frameLayout)
                 .autoLoadImage(true)
                 .go();
 
-
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        ZWebHelper.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        ZWebHelper.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ZWebHelper.onDestroy();
+    }
 
     @Override
     protected void onStop() {
