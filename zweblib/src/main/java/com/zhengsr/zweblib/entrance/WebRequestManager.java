@@ -102,7 +102,9 @@ public class WebRequestManager implements ZwebLoadListener {
         mWebView = (ZwebView) mWeakMap.get(RouteKey.WEBVIEW.name()).get();
         //开启硬件加速
         mWebView.setLayerType(View.LAYER_TYPE_HARDWARE,null);
-        WebView.setWebContentsDebuggingEnabled(true);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            WebView.setWebContentsDebuggingEnabled(true);
+        }
         configWebSettings();
         mBar = new ProgressView(mContext).setSize(mContext.getResources().getDisplayMetrics().widthPixels,
                 builder.getBarHeight() );
@@ -134,12 +136,21 @@ public class WebRequestManager implements ZwebLoadListener {
 
         //屏幕自适应
         mWebSettings.setUseWideViewPort(true);
-        mWebSettings.setLoadsImagesAutomatically(true);
+        mWebSettings.setLoadWithOverviewMode(true);
+        mWebSettings.setDomStorageEnabled(true);
         mWebSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
+      //  mWebSettings.setTextZoom(100);
+
+        //启动数据库
+        mWebSettings.setDatabaseEnabled(true);
+        //数据库定位
+        String dir = mContext.getApplicationContext().getDir("database",Context.MODE_PRIVATE).getPath();
+        mWebSettings.setGeolocationDatabasePath(dir);
+
 
         //缩放操作
         mWebSettings.setSupportZoom(true); //支持缩放，默认为true。是下面那个的前提。
-        mWebSettings.setBuiltInZoomControls(true); //设置内置的缩放控件。若为false，则该WebView不可缩放
+        mWebSettings.setBuiltInZoomControls(false); //设置内置的缩放控件。若为false，则该WebView不可缩放
         mWebSettings.setDisplayZoomControls(false); //隐藏原生的缩放控件
 
         //文件权限
@@ -162,8 +173,15 @@ public class WebRequestManager implements ZwebLoadListener {
             mWebSettings.setLoadsImagesAutomatically(false);
         }
 
-
         //缓存和图片加载，请自行配置
+       /* mWebSettings.setAppCacheEnabled(true);
+        mWebSettings.setDatabaseEnabled(true);
+        mWebSettings.setDatabaseEnabled(true);
+        if (CommonUtils.isNetworkConnected()) {
+            mWebSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        }else{
+            mWebSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        }*/
     }
 
 
@@ -288,8 +306,9 @@ public class WebRequestManager implements ZwebLoadListener {
         if (!getWebSettings().getLoadsImagesAutomatically()){
             getWebSettings().setLoadsImagesAutomatically(true);
         }
-
     }
+
+
 
     @Override
     public void onReceivedError(String errorUrl, String errorMsg) {

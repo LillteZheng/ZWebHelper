@@ -8,6 +8,7 @@ import android.net.Uri;
 import android.net.http.SslError;
 import android.util.Log;
 import android.webkit.SslErrorHandler;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
@@ -38,6 +39,7 @@ public class ZWebViewClient extends WebViewClient {
         return true;
     }
 
+
     @Override
     public void onPageStarted(WebView view, String url, Bitmap favicon) {
        if (mListener != null){
@@ -51,6 +53,8 @@ public class ZWebViewClient extends WebViewClient {
             mListener.onPageFinish();
         }
     }
+
+
 
 
     private boolean handleCommonLink(String url) {
