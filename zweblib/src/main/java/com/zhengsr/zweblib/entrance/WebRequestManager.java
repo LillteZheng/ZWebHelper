@@ -133,7 +133,7 @@ public class WebRequestManager implements ZwebLoadListener {
         mWebSettings.setJavaScriptCanOpenWindowsAutomatically(true);
 
         //屏幕自适应
-        mWebSettings.setUseWideViewPort(true);
+       // mWebSettings.setUseWideViewPort(true);
         mWebSettings.setLoadWithOverviewMode(true);
         mWebSettings.setDomStorageEnabled(true);
         mWebSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
@@ -148,7 +148,7 @@ public class WebRequestManager implements ZwebLoadListener {
 
         //缩放操作
         mWebSettings.setSupportZoom(true); //支持缩放，默认为true。是下面那个的前提。
-   //     mWebSettings.setBuiltInZoomControls(false); //设置内置的缩放控件。若为false，则该WebView不可缩放
+        mWebSettings.setBuiltInZoomControls(false); //设置内置的缩放控件。若为false，则该WebView不可缩放
         mWebSettings.setDisplayZoomControls(false); //隐藏原生的缩放控件
 
         //文件权限
