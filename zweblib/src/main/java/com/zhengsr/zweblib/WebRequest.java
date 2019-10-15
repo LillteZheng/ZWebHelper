@@ -43,6 +43,7 @@ public class WebRequest {
         LoadDataBean loadBean;
         LoadBaseBean loadBaseBean;
         private boolean isAutoLoadImage = true;
+        private boolean useCache = false;
 
         public WebBuilder url(String url){
             this.url = url;
@@ -75,6 +76,10 @@ public class WebRequest {
             return this;
         }
 
+        public WebBuilder useCache(boolean useCache){
+            this.useCache = useCache;
+            return this;
+        }
         public WebBuilder loadDataWithBaseURL(String baseUrl,String data){
             loadBaseBean = new LoadBaseBean();
             loadBaseBean.baseUrl = baseUrl;
@@ -124,7 +129,9 @@ public class WebRequest {
             return this;
         }
 
-
+        public boolean isUseCache() {
+            return useCache;
+        }
 
         public Context getContext() {
             return context;

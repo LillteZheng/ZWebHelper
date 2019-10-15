@@ -2,6 +2,7 @@ package com.zhengsr.zweblib.entrance;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
@@ -12,8 +13,6 @@ import android.webkit.ValueCallback;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
-import com.ist.lifecyclerlib.ZLifeCycle;
-import com.ist.lifecyclerlib.listener.LifeListenerAdapter;
 import com.zhengsr.zweblib.WebRequest;
 import com.zhengsr.zweblib.bean.LoadBaseBean;
 import com.zhengsr.zweblib.bean.LoadDataBean;
@@ -82,7 +81,6 @@ public class WebRequestManager implements ZwebLoadListener {
         mContext = (Context) mWeakMap.get(RouteKey.CONTEXT.name()).get();
         mParentView = (ViewGroup) mWeakMap.get(RouteKey.PARENTVIEW.name()).get();
 
-        getLifeCycle(mContext);
 
         configData(mBuilder);
 
@@ -173,15 +171,17 @@ public class WebRequestManager implements ZwebLoadListener {
             mWebSettings.setLoadsImagesAutomatically(false);
         }
 
-        //缓存和图片加载，请自行配置
-       /* mWebSettings.setAppCacheEnabled(true);
-        mWebSettings.setDatabaseEnabled(true);
-        mWebSettings.setDatabaseEnabled(true);
-        if (CommonUtils.isNetworkConnected()) {
-            mWebSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
-        }else{
-            mWebSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
-        }*/
+        if (mBuilder.isUseCache()) {
+            //缓存和图片加载，请自行配置
+            mWebSettings.setAppCacheEnabled(true);
+            mWebSettings.setDatabaseEnabled(true);
+            mWebSettings.setDatabaseEnabled(true);
+            if (isNetworkConnected()) {
+                mWebSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
+            } else {
+                mWebSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+            }
+        }
     }
 
 
@@ -218,39 +218,6 @@ public class WebRequestManager implements ZwebLoadListener {
     }
 
 
-    private void getLifeCycle(Context context){
-        ZLifeCycle.with(context, new LifeListenerAdapter() {
-            @Override
-            public void onResume() {
-                if (!isOnResume) {
-                    WebRequestManager.this.onResume();
-                }
-                super.onResume();
-            }
-
-
-            @Override
-            public void onPause() {
-                if (!isOnPause) {
-                    WebRequestManager.this.onPause();
-                }
-                super.onPause();
-            }
-
-            @Override
-            public void onDestroy() {
-                if (!isOndestory) {
-                    WebRequestManager.this.onDestroy();
-                }
-                super.onDestroy();
-            }
-
-            @Override
-            public void onFail(String errorMsg) {
-                super.onFail(errorMsg);
-            }
-        });
-    }
 
     public void onResume(){
         isOnResume = true;
@@ -320,13 +287,14 @@ public class WebRequestManager implements ZwebLoadListener {
     public void onReceivedError(String errorUrl, String errorMsg) {
         isErrorLoad = true;
         Log.d(TAG, "zsr --> onReceivedError: "+errorMsg);
-        if (mBuilder != null) {
+        if (mBuilder != null && !mBuilder.isUseCache()) {
             if (!TextUtils.isEmpty(mBuilder.getErrorUrl())) {
                 mWebView.loadUrl(mBuilder.getErrorUrl());
             }
             if (mBuilder.getErrorView() != null) {
                 mParentView.removeAllViews();
                 if (mWebView != null) {
+                    //去除以前的加载页
                     mWebView.loadDataWithBaseURL(null,"","text/html","utf-8",null);
                 }
                 mParentView.addView(mBuilder.getErrorView());
@@ -360,4 +328,10 @@ public class WebRequestManager implements ZwebLoadListener {
         mWebView.evaluateJavascript(action,callback);
     }
 
+
+    private   boolean isNetworkConnected() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        assert connectivityManager != null;
+        return connectivityManager.getActiveNetworkInfo() != null;
+    }
 }

@@ -11,19 +11,20 @@
 	}
 ```
 ```
-implementation 'com.github.LillteZheng:ZWebHelper:v1.8'
+implementation 'com.github.LillteZheng:ZWebHelper:v1.8.2'
 ```
 
 ## 基本使用
 ```
- ZWebHelper.with(this)
-                //.url(url)
-                //.loadData(data)
-                .loadDataWithBaseURL(baseURL,data)
-                .errorView(view)
-                .parentView(frameLayout)
-                .autoLoadImage(true)
-                .go();
+ZWebHelper.with(this)
+        .url(url)
+        //.loadData(data)
+       // .loadDataWithBaseURL(null,dataUrl)
+        .errorView(view)
+        .useCache(true) //当使用cache 时，自己写的errorview不执行，因为会干扰 cache
+        .parentView(frameLayout)
+        .autoLoadImage(true)
+        .go();
 ```
 其中，自己配置了一些 WebSetting 的配置，如下：
 ```

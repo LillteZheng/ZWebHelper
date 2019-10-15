@@ -1,10 +1,13 @@
 package com.zhengsr.zwebhelper;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -215,14 +218,17 @@ public class WebViewActivity extends AppCompatActivity {
         frameLayout.addView(webView);
         webView.loadDataWithBaseURL(null,dataUrl,"text/html","utf-8",null);*/
 
+
         ZWebHelper.with(this)
                 .url(url)
                 //.loadData(data)
                // .loadDataWithBaseURL(null,dataUrl)
                 .errorView(view)
+                .useCache(true) //当使用cache 时，自己写的errorview不执行，因为会干扰 cache
                 .parentView(frameLayout)
                 .autoLoadImage(true)
                 .go();
+
 
     }
 
