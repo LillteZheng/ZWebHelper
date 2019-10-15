@@ -12,6 +12,8 @@ import android.webkit.ValueCallback;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
+import com.ist.lifecyclerlib.ZLifeCycle;
+import com.ist.lifecyclerlib.listener.LifeListenerAdapter;
 import com.zhengsr.zweblib.WebRequest;
 import com.zhengsr.zweblib.bean.LoadBaseBean;
 import com.zhengsr.zweblib.bean.LoadDataBean;
@@ -80,6 +82,7 @@ public class WebRequestManager implements ZwebLoadListener {
         mContext = (Context) mWeakMap.get(RouteKey.CONTEXT.name()).get();
         mParentView = (ViewGroup) mWeakMap.get(RouteKey.PARENTVIEW.name()).get();
 
+        getLifeCycle(mContext);
 
         configData(mBuilder);
 
@@ -132,7 +135,7 @@ public class WebRequestManager implements ZwebLoadListener {
         mWebSettings.setJavaScriptCanOpenWindowsAutomatically(true);
 
         //屏幕自适应
-       // mWebSettings.setUseWideViewPort(true);
+        mWebSettings.setUseWideViewPort(true);
         mWebSettings.setLoadWithOverviewMode(true);
         mWebSettings.setDomStorageEnabled(true);
         mWebSettings.setLayoutAlgorithm(WebSettings.LayoutAlgorithm.SINGLE_COLUMN);
@@ -147,7 +150,7 @@ public class WebRequestManager implements ZwebLoadListener {
 
         //缩放操作
         mWebSettings.setSupportZoom(true); //支持缩放，默认为true。是下面那个的前提。
-        mWebSettings.setBuiltInZoomControls(false); //设置内置的缩放控件。若为false，则该WebView不可缩放
+   //     mWebSettings.setBuiltInZoomControls(false); //设置内置的缩放控件。若为false，则该WebView不可缩放
         mWebSettings.setDisplayZoomControls(false); //隐藏原生的缩放控件
 
         //文件权限
@@ -215,18 +218,57 @@ public class WebRequestManager implements ZwebLoadListener {
     }
 
 
+    private void getLifeCycle(Context context){
+        ZLifeCycle.with(context, new LifeListenerAdapter() {
+            @Override
+            public void onResume() {
+                if (!isOnResume) {
+                    WebRequestManager.this.onResume();
+                }
+                super.onResume();
+            }
+
+
+            @Override
+            public void onPause() {
+                if (!isOnPause) {
+                    WebRequestManager.this.onPause();
+                }
+                super.onPause();
+            }
+
+            @Override
+            public void onDestroy() {
+                if (!isOndestory) {
+                    WebRequestManager.this.onDestroy();
+                }
+                super.onDestroy();
+            }
+
+            @Override
+            public void onFail(String errorMsg) {
+                super.onFail(errorMsg);
+            }
+        });
+    }
 
     public void onResume(){
         isOnResume = true;
-        getWebView().onResume();
-        //for js
-        getWebView().resumeTimers();
+        if (mWebView != null) {
+            mWebView.onResume();
+            //for js
+            mWebView.resumeTimers();
+
+        }
     }
     public void onPause(){
         isOnPause = true;
-        getWebView().onPause();
-        //for js
-        getWebView().pauseTimers();
+        if (mWebView != null) {
+            mWebView.onPause();
+            //for js
+            mWebView.pauseTimers();
+
+        }
     }
     public void onDestroy(){
         isOndestory = true;
@@ -246,7 +288,6 @@ public class WebRequestManager implements ZwebLoadListener {
         mBar = null;
         mBuilder = null;
         mWebSettings = null;
-
     }
 
     @Override
@@ -278,14 +319,16 @@ public class WebRequestManager implements ZwebLoadListener {
     @Override
     public void onReceivedError(String errorUrl, String errorMsg) {
         isErrorLoad = true;
-     //   Log.d(TAG, "zsr --> onReceivedError: "+errorMsg);
+        Log.d(TAG, "zsr --> onReceivedError: "+errorMsg);
         if (mBuilder != null) {
             if (!TextUtils.isEmpty(mBuilder.getErrorUrl())) {
                 mWebView.loadUrl(mBuilder.getErrorUrl());
             }
             if (mBuilder.getErrorView() != null) {
                 mParentView.removeAllViews();
-                getWebView().loadDataWithBaseURL(null,"","text/html","utf-8",null);
+                if (mWebView != null) {
+                    mWebView.loadDataWithBaseURL(null,"","text/html","utf-8",null);
+                }
                 mParentView.addView(mBuilder.getErrorView());
             }
         }
@@ -308,7 +351,9 @@ public class WebRequestManager implements ZwebLoadListener {
         if (!action.contains("javascript")){
             action = "javascript:"+action;
         }
-        getWebView().loadUrl(action);
+        if (mWebView != null) {
+           mWebView.loadUrl(action);
+        }
     }
 
     public void evaluateJavascript(String action,ValueCallback<String> callback) {

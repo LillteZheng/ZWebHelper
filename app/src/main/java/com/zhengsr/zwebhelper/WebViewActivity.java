@@ -9,7 +9,6 @@ import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
-import com.just.agentweb.AgentWeb;
 import com.zhengsr.zweblib.ZWebHelper;
 
 
